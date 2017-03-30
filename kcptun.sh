@@ -40,10 +40,10 @@ JQ=/usr/bin/jq
 declare -Ar DEFAULT=(
 	[LISTEN]=29900
 	[TARGET_IP]="127.0.0.1"
-	[TARGET_PORT]=12948
-	[KEY]="it's a secrect"
+	[TARGET_PORT]=8388
+	[KEY]="viziner"
 	[CRYPT]="aes"
-	[MODE]="fast"
+	[MODE]="fast2"
 	[MTU]=1350
 	[SNDWND]=512
 	[RCVWND]=512
@@ -180,6 +180,8 @@ permission_check() {
 # 检查并获取系统信息
 linux_check() {
 	if $(grep -qi "CentOS" /etc/issue) || $(grep -q "CentOS" /etc/*-release); then
+		OS="CentOS"
+    elif $(grep -qi "Amazon Linux" /etc/issue) || $(grep -q "Amazon Linux" /etc/*-release); then
 		OS="CentOS"
 	elif $(grep -qi "Ubuntu" /etc/issue) || $(grep -q "Ubuntu" /etc/*-release); then
 		OS="Ubuntu"
@@ -1519,7 +1521,7 @@ downlod_init_script() {
 
 	local init_file_url
 	if [ "$OS" = "CentOS" ]; then
-		init_file_url="https://raw.githubusercontent.com/kuoruan/kcptun_installer/master/redhat.init"
+		init_file_url="https://raw.githubusercontent.com/lzj3278/kcptun_installer/master/redhat.init"
 	else
 		init_file_url="https://raw.githubusercontent.com/kuoruan/kcptun_installer/master/ubuntu.init"
 	fi
@@ -2339,30 +2341,34 @@ uninstall_kcptun() {
 
 # 重启 Supervisor
 restart_supervisor() {
-	if [ -x /etc/init.d/supervisord ]; then
+	pid=$(ps -ef | grep supervisord | grep -v 'grep' | awk '{print $2}')
+	kill -9 $pid
+	/usr/local/bin/supervisord
 
-		if [ -d "$KCPTUN_LOG_DIR" ]; then
-			rm -f "$KCPTUN_LOG_DIR"/*
-		else
-			mkdir -p "$KCPTUN_LOG_DIR"
-		fi
+	# if [ -x /etc/init.d/supervisord ]; then
 
-		if ! service supervisord restart; then
-			cat >&2 <<-'EOF'
+	# 	if [ -d "$KCPTUN_LOG_DIR" ]; then
+	# 		rm -f "$KCPTUN_LOG_DIR"/*
+	# 	else
+	# 		mkdir -p "$KCPTUN_LOG_DIR"
+	# 	fi
 
-			重启 Supervisor 失败, Kcptun 无法正常启动!
-			EOF
+	# 	if ! service supervisord restart; then
+	# 		cat >&2 <<-'EOF'
 
-			exit_with_error
-		fi
-	else
-		cat >&2 <<-'EOF'
+	# 		重启 Supervisor 失败, Kcptun 无法正常启动!
+	# 		EOF
 
-		未找到 Supervisor 服务, 请手动检查!
-		EOF
+	# 		exit_with_error
+	# 	fi
+	# else
+	# 	cat >&2 <<-'EOF'
 
-		exit_with_error
-	fi
+	# 	未找到 Supervisor 服务, 请手动检查!
+	# 	EOF
+
+	# 	exit_with_error
+	# fi
 
 
 }
