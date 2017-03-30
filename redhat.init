@@ -36,7 +36,7 @@ test -x $SUPERVISORD || exit 1
 
 do_start() {
         echo -n $"Starting $NAME: "
-        $SUPERVISORD
+        $SUPERVISORD >&/dev/null
         RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && $SUPERVISORCTL status
@@ -45,8 +45,8 @@ do_start() {
 do_stop() {
     if $SUPERVISORCTL status >&/dev/null; then
         echo -n $"Stopping $NAME: "
-        pid = $(ps -ef | grep supervisord | grep -v 'grep' | awk '{print $2}')
-        kill -9 $pid
+        pid=$(ps -ef | grep supervisord | grep -v 'grep' | awk '{print $2}')
+        kill -9 $pid >&/dev/null
     else
         echo "$NAME is not running."
         RETVAL=0
