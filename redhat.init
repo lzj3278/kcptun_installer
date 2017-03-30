@@ -35,17 +35,11 @@ RETVAL=0
 test -x $SUPERVISORD || exit 1
 
 do_start() {
-    if  $SUPERVISORCTL status >&/dev/null; then
-        echo "$NAME is already running."
-        RETVAL=0
-    else
         echo -n $"Starting $NAME: "
         $SUPERVISORD
         RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && $SUPERVISORCTL status
-    fi
-
 }
 
 do_stop() {
@@ -61,8 +55,6 @@ do_stop() {
 
 chk_status() {
     $SUPERVISORCTL status
-    RETVAL=$?
-    [ $RETVAL -eq 0 ] && $SUPERVISORCTL status
 }
 
 case "$1" in
