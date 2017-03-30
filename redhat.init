@@ -40,10 +40,10 @@ do_start() {
         RETVAL=0
     else
         echo -n $"Starting $NAME: "
-        daemon --pidfile=$PIDFILE $SUPERVISORD $OPTIONS -j $PIDFILE
+        $SUPERVISORD
         RETVAL=$?
         echo
-        [ $RETVAL -eq 0 ] && $SUPERVISORCTL $OPTIONS status
+        [ $RETVAL -eq 0 ] && $SUPERVISORCTL status
     fi
 
 }
@@ -51,10 +51,8 @@ do_start() {
 do_stop() {
     if $SUPERVISORCTL status >&/dev/null; then
         echo -n $"Stopping $NAME: "
-        killproc -p $PIDFILE -d $STOP_TIMEOUT $SUPERVISORD
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && rm -rf $PIDFILE
+        pid = $(ps -ef | grep supervisord | grep -v 'grep' | awk '{print $2}')
+        kill -9 $pid
     else
         echo "$NAME is not running."
         RETVAL=0
@@ -64,7 +62,7 @@ do_stop() {
 chk_status() {
     $SUPERVISORCTL status
     RETVAL=$?
-    [ $RETVAL -eq 0 ] && $SUPERVISORCTL $OPTIONS status
+    [ $RETVAL -eq 0 ] && $SUPERVISORCTL status
 }
 
 case "$1" in
