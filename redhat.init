@@ -35,7 +35,7 @@ RETVAL=0
 test -x $SUPERVISORD || exit 1
 
 do_start() {
-    if status -p $PIDFILE $SUPERVISORD >&/dev/null; then
+    if  $SUPERVISORCTL status >&/dev/null; then
         echo "$NAME is already running."
         RETVAL=0
     else
@@ -49,7 +49,7 @@ do_start() {
 }
 
 do_stop() {
-    if status -p $PIDFILE $SUPERVISORD >&/dev/null; then
+    if $SUPERVISORCTL status >&/dev/null; then
         echo -n $"Stopping $NAME: "
         killproc -p $PIDFILE -d $STOP_TIMEOUT $SUPERVISORD
         RETVAL=$?
@@ -62,7 +62,7 @@ do_stop() {
 }
 
 chk_status() {
-    status -p $PIDFILE $SUPERVISORD
+    $SUPERVISORCTL status
     RETVAL=$?
     [ $RETVAL -eq 0 ] && $SUPERVISORCTL $OPTIONS status
 }
